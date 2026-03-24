@@ -159,7 +159,7 @@ function Dashboard({
         <div
           style={{
             position: "fixed",
-            top: "88px",       // just below header
+            top: "100px",       // just below header
             right: "20px",
             zIndex: 10,
             display: "flex",
