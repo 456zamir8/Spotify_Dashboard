@@ -15,18 +15,6 @@ function App() {
   // Parse token from URL hash
   useEffect(() => {
     const hash = window.location.hash;
-    if (hash) {
-      const params = new URLSearchParams(hash.replace("#", ""));
-      const accessToken = params.get("access_token");
-      if (accessToken) {
-        setToken(accessToken);
-        window.location.hash = ""; // clean URL
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    const hash = window.location.hash;
 
     if (hash) {
       const params = new URLSearchParams(hash.replace("#", ""));
@@ -42,9 +30,31 @@ function App() {
     }
   }, []);
 
+  // Fetch user profile
+  useEffect(() => {
+    if (!token) return;
+
+    fetch("https://api.spotify.com/v1/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("✅ PROFILE DATA:", data); // 👈 DEBUG HERE
+        setProfile(data);
+      })
+      .catch((err) => {
+        console.log("❌ ERROR:", err);
+      });
+  }, [token]);
+
 
   return (
     <>
+      <p style={{ color: "white", position: "fixed", bottom: "10px", left: "10px" }}>
+        {token ? "✅ Token OK" : "❌ No Token"} |{" "}
+        {profile ? "✅ Profile Loaded" : "❌ No Profile"}
+      </p>
+      
       <div style={{ width: '100%', height: '600px', position: 'relative' }}>
         <Grainient
           color1="#0B0F0C"
