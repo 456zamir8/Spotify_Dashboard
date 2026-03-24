@@ -4,7 +4,7 @@ const REDIRECT_URI = "https://456zamir8.github.io/Spotify_Dashboard/";
 function generateRandomString(length: number) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   return Array.from(crypto.getRandomValues(new Uint8Array(length)))
-    .map(x => chars[x % chars.length])
+    .map((x) => chars[x % chars.length])
     .join("");
 }
 
@@ -29,8 +29,62 @@ export const loginWithSpotify = async () => {
     redirect_uri: REDIRECT_URI,
     code_challenge_method: "S256",
     code_challenge: challenge,
-    scope: "user-read-private user-read-email"
+    scope: "user-read-private user-read-email user-top-read",
   });
 
   window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
+};
+
+// Call this on app load — exchanges the ?code= param for a real access token
+export const handleSpotifyCallback = async (): Promise<string | null> => {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+
+  if (!code) return null;
+
+  const verifier = localStorage.getItem("verifier");
+  if (!verifier) {
+    console.error("❌ No verifier found in localStorage");
+    return null;
+  }
+
+  // Clean URL immediately so refresh doesn't re-trigger
+  window.history.replaceState({}, "", window.location.pathname);
+
+  const body = new URLSearchParams({
+    client_id: CLIENT_ID,
+    grant_type: "authorization_code",
+    code,
+    redirect_uri: REDIRECT_URI,
+    code_verifier: verifier,
+  });
+
+  const response = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    console.error("❌ Token exchange failed:", err);
+    return null;
+  }
+
+  const data = await response.json();
+  const token: string = data.access_token;
+
+  // Persist token so it survives page refreshes (until expiry)
+  localStorage.setItem("spotify_token", token);
+  localStorage.removeItem("verifier");
+
+  return token;
+};
+
+export const getStoredToken = (): string | null =>
+  localStorage.getItem("spotify_token");
+
+export const logout = () => {
+  localStorage.removeItem("spotify_token");
+  localStorage.removeItem("verifier");
 };
