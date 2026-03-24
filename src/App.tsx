@@ -1,18 +1,55 @@
 import './index.css'
 
+import React, { useEffect, useState } from "react";
+import { loginWithSpotify } from "./data/auth";
+
 import Header from "./components/Header";
 import Grainient from './components/Grainient';
 import TiltedCard from './components/TiltedCard';
 
 function App() {
 
+  const [token, setToken] = useState<string | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+
+  // Parse token from URL hash
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const params = new URLSearchParams(hash.replace("#", ""));
+      const accessToken = params.get("access_token");
+      if (accessToken) {
+        setToken(accessToken);
+        window.location.hash = ""; // clean URL
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const hash = window.location.hash;
+
+    if (hash) {
+      const params = new URLSearchParams(hash.replace("#", ""));
+      const accessToken = params.get("access_token");
+
+      if (accessToken) {
+        console.log("✅ TOKEN RECEIVED:", accessToken); // 👈 DEBUG HERE
+        setToken(accessToken);
+        window.location.hash = "";
+      } else {
+        console.log("❌ NO TOKEN FOUND");
+      }
+    }
+  }, []);
+
+
   return (
     <>
       <div style={{ width: '100%', height: '600px', position: 'relative' }}>
         <Grainient
-color1="#0B0F0C"
-color2="#1DB954"
-color3="#191414"
+          color1="#0B0F0C"
+          color2="#1DB954"
+          color3="#191414"
           timeSpeed={0.25}
           colorBalance={0}
           warpStrength={1}
@@ -36,8 +73,13 @@ color3="#191414"
       </div>
 
       {/* Header */}
-      <Header />
+      <Header
+        isLoggedIn={!!profile}
+        avatarUrl={profile?.images?.[0]?.url}
+        onLogin={loginWithSpotify}
+      />
 
+      {/* Tilted Card */}
       <div className="fixed top-25 right-5 z-10">
         <TiltedCard
           imageSrc="https://i.scdn.co/image/ab67616d0000b273d9985092cd88bffd97653b58"

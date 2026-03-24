@@ -1,14 +1,24 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  avatarUrl?: string;
+  isLoggedIn: boolean;
+  onLogin: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({
+  avatarUrl,
+  isLoggedIn,
+  onLogin
+}) => {
   const [open, setOpen] = useState(false);
 
   const hour = new Date().getHours();
   let greeting = "Hello";
-  if (hour < 12) greeting = "Good Morning ☀️";
-  else if (hour < 18) greeting = "Good Afternoon 🌤️";
-  else greeting = "Good Evening 🌙";
+  if (hour < 12) greeting = "Good Morning";
+  else if (hour < 18) greeting = "Good Afternoon";
+  else greeting = "Good Evening";
 
   return (
     <div
@@ -23,7 +33,7 @@ const Header: React.FC = () => {
         zIndex: 50
       }}
     >
-      {/* Greeting with subtle animation */}
+      {/* Greeting */}
       <motion.h1
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -37,60 +47,81 @@ const Header: React.FC = () => {
         {greeting}
       </motion.h1>
 
-      {/* Profile Section */}
-      <div style={{ position: "relative" }}>
-        <motion.div
-          whileHover={{ scale: 1.1 }}
+      {/* RIGHT SIDE */}
+      {!isLoggedIn ? (
+        // 🔥 LOGIN BUTTON
+        <motion.button
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setOpen(!open)}
+          onClick={onLogin}
           style={{
-            width: "45px",
-            height: "45px",
-            borderRadius: "50%",
-            overflow: "hidden",
+            padding: "8px 16px",
+            borderRadius: "999px",
+            border: "none",
             cursor: "pointer",
-            border: "2px solid rgba(255,255,255,0.2)"
+            fontWeight: 600,
+            color: "#000",
+            background: "#1DB954", // Spotify green
           }}
         >
-          <img
-            src="https://i.pravatar.cc/100"
-            alt="User"
+          Login with Spotify
+        </motion.button>
+      ) : (
+        // 🔥 PROFILE SECTION
+        <div style={{ position: "relative" }}>
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setOpen(!open)}
             style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover"
+              width: "45px",
+              height: "45px",
+              borderRadius: "50%",
+              overflow: "hidden",
+              cursor: "pointer",
+              border: "2px solid rgba(255,255,255,0.2)"
             }}
-          />
-        </motion.div>
-
-        {/* Dropdown */}
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
+          >
+            <img
+              src={avatarUrl || "https://i.pravatar.cc/100"}
+              alt="User"
               style={{
-                position: "absolute",
-                top: "60px",
-                right: 0,
-                width: "180px",
-                borderRadius: "12px",
-                padding: "10px",
-                background: "rgba(255,255,255,0.08)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.4)"
+                width: "100%",
+                height: "100%",
+                objectFit: "cover"
               }}
-            >
-              <div style={menuItem}>Profile</div>
-              <div style={menuItem}>Settings</div>
-              <div style={menuItem}>Logout</div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+            />
+          </motion.div>
+
+          {/* Dropdown */}
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  position: "absolute",
+                  top: "60px",
+                  right: 0,
+                  width: "180px",
+                  borderRadius: "12px",
+                  padding: "10px",
+                  background: "rgba(255,255,255,0.08)",
+                  backdropFilter: "blur(12px)",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.4)"
+                }}
+              >
+                <div style={menuItem}>Profile</div>
+                <div style={menuItem}>Settings</div>
+                <div style={menuItem}>Logout</div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 };
