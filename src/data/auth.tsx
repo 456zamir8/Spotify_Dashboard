@@ -29,13 +29,17 @@ export const loginWithSpotify = async () => {
     redirect_uri: REDIRECT_URI,
     code_challenge_method: "S256",
     code_challenge: challenge,
-    scope: "user-read-private user-read-email user-top-read",
+    scope: [
+      "user-read-private",
+      "user-read-email",
+      "user-top-read",
+      "user-read-recently-played",  // ← needed for last played
+    ].join(" "),
   });
 
   window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
 };
 
-// Call this on app load — exchanges the ?code= param for a real access token
 export const handleSpotifyCallback = async (): Promise<string | null> => {
   const params = new URLSearchParams(window.location.search);
   const code = params.get("code");
@@ -48,7 +52,6 @@ export const handleSpotifyCallback = async (): Promise<string | null> => {
     return null;
   }
 
-  // Clean URL immediately so refresh doesn't re-trigger
   window.history.replaceState({}, "", window.location.pathname);
 
   const body = new URLSearchParams({
@@ -74,7 +77,6 @@ export const handleSpotifyCallback = async (): Promise<string | null> => {
   const data = await response.json();
   const token: string = data.access_token;
 
-  // Persist token so it survives page refreshes (until expiry)
   localStorage.setItem("spotify_token", token);
   localStorage.removeItem("verifier");
 
