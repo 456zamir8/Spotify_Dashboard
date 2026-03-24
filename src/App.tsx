@@ -1,6 +1,6 @@
 import './index.css'
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { loginWithSpotify } from "./data/auth";
 
 import Header from "./components/Header";
@@ -54,7 +54,7 @@ function App() {
         {token ? "✅ Token OK" : "❌ No Token"} |{" "}
         {profile ? "✅ Profile Loaded" : "❌ No Profile"}
       </p>
-      
+
       <div style={{ width: '100%', height: '600px', position: 'relative' }}>
         <Grainient
           color1="#0B0F0C"
